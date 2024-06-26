@@ -17,7 +17,7 @@ jobs:
       id: trigger-boomi
       env:
         BOOMI_USERNAME: ${{ secrets.learining }}
-        BOOMI_PASSWORD: ${{ secrets.June@20248x8 }}
+        BOOMI_PASSWORD: ${{ secrets.'June@20248x8' }}
         BOOMI_ACCOUNT_ID: ${{ secrets.learining-YAK28G }}
       run: |
         echo "Triggering Boomi process..."
