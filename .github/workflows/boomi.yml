@@ -1,0 +1,53 @@
+name: Dell Boomi Integration
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  boomi:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Trigger Boomi Process
+      id: trigger-boomi
+      env:
+        BOOMI_USERNAME: ${{ secrets.BOOMI_USERNAME }}
+        BOOMI_PASSWORD: ${{ secrets.BOOMI_PASSWORD }}
+        BOOMI_ACCOUNT_ID: ${{ secrets.BOOMI_ACCOUNT_ID }}
+      run: |
+        echo "Triggering Boomi process..."
+        response=$(curl -X POST "https://api.boomi.com/api/rest/v1/${{ secrets.BOOMI_ACCOUNT_ID }}/executeProcess" \
+          -u "${{ secrets.BOOMI_USERNAME }}:${{ secrets.BOOMI_PASSWORD }}" \
+          -H "Content-Type: application/json" \
+          -d '{"processId":"YOUR_PROCESS_ID"}')
+        echo "Response: $response"
+        process_execution_id=$(echo $response | jq -r '.executionId')
+        echo "::set-output name=process_execution_id::$process_execution_id"
+
+    - name: Check Boomi Process Status
+      id: check-status
+      env:
+        BOOMI_USERNAME: ${{ secrets.BOOMI_USERNAME }}
+        BOOMI_PASSWORD: ${{ secrets.BOOMI_PASSWORD }}
+        BOOMI_ACCOUNT_ID: ${{ secrets.BOOMI_ACCOUNT_ID }}
+      run: |
+        echo "Checking Boomi process status..."
+        status="RUNNING"
+        while [ "$status" == "RUNNING" ]; do
+          sleep 10
+          response=$(curl -X GET "https://api.boomi.com/api/rest/v1/${{ secrets.BOOMI_ACCOUNT_ID }}/processExecution/${{ steps.trigger-boomi.outputs.process_execution_id }}" \
+            -u "${{ secrets.BOOMI_USERNAME }}:${{ secrets.BOOMI_PASSWORD }}")
+          status=$(echo $response | jq -r '.status')
+          echo "Current status: $status"
+        done
+        echo "::set-output name=status::$status"
+
+    - name: Process Status Notification
+      if: steps.check-status.outputs.status != 'COMPLETED'
+      run: |
+        echo "Boomi process did not complete successfully."
