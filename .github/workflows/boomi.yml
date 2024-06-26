@@ -16,9 +16,9 @@ jobs:
     - name: Trigger Boomi Process
       id: trigger-boomi
       env:
-        BOOMI_USERNAME: ${{ secrets.BOOMI_USERNAME }}
-        BOOMI_PASSWORD: ${{ secrets.BOOMI_PASSWORD }}
-        BOOMI_ACCOUNT_ID: ${{ secrets.BOOMI_ACCOUNT_ID }}
+        BOOMI_USERNAME: ${{ secrets.learining }}
+        BOOMI_PASSWORD: ${{ secrets.June@20248x8 }}
+        BOOMI_ACCOUNT_ID: ${{ secrets.learining-YAK28G }}
       run: |
         echo "Triggering Boomi process..."
         response=$(curl -X POST "https://api.boomi.com/api/rest/v1/${{ secrets.BOOMI_ACCOUNT_ID }}/executeProcess" \
